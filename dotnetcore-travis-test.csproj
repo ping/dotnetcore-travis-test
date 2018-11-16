@@ -6,4 +6,8 @@
     <RootNamespace>dotnetcore_travis_test</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="PdfRpt.Core" Version="1.2.2" />
+  </ItemGroup>
+
 </Project>
