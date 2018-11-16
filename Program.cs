@@ -6,7 +6,7 @@ namespace dotnetcore_travis_test
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Hello Test World!");
         }
     }
 }
