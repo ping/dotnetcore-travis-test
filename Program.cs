@@ -49,15 +49,15 @@ namespace dotnetcore_travis_test
                 Console.WriteLine($"Created merged pdf: {mergedFilename}");
 
                 // clean up streams we opened
-                foreach (var stream in inputStreams)
-                {
-                    stream?.Close();
-                    stream?.Dispose();
-                }
+                // foreach (var stream in inputStreams)
+                // {
+                //     stream?.Close();
+                //     stream?.Dispose();
+                // }
                 // also clean merged pdf streams just in case
                 foreach (var stream in mergePdfDocuments.InputFileStreams)
                 {
-                    stream?.Close();
+                    // stream?.Close();
                     stream?.Dispose();
                 }
                 mergePdfDocuments.OutputFileStream.Close();
