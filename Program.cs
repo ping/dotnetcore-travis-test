@@ -1,6 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Diagnostics;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using PdfRpt.Core.Helper;
@@ -11,6 +15,52 @@ namespace dotnetcore_travis_test
     class Program
     {
         static void Main(string[] args)
+        {
+            int numOfLoops = 10;
+            var host = "https://www.google.com";
+
+            Console.WriteLine($"Execute {numOfLoops} loops with New HttpClient...");
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            for (int i = 1; i <= numOfLoops; i++)
+            {
+                Console.Write($"{i}... ");
+                CallFreshHttpClientAsync(host).Wait();
+            }
+            sw.Stop();
+            Console.WriteLine("Elapsed={0} ms", sw.Elapsed.TotalMilliseconds);
+
+            using (var clientShared = new HttpClient())
+            {
+                Console.WriteLine($"Execute {numOfLoops} loops with Shared HttpClient...");
+                sw.Restart();
+                for (int i = 1; i <= numOfLoops; i++)
+                {
+                    Console.Write($"{i}... ");
+                    CallHttpClientAsync(clientShared, host).Wait();
+                }
+                sw.Stop();
+                Console.WriteLine("Elapsed={0} ms", sw.Elapsed.TotalMilliseconds);
+            }
+        }
+
+        private static async Task CallFreshHttpClientAsync(string host)
+        {
+            // intentionally test with fresh client
+            using (HttpClient client = new HttpClient())
+            {
+                var stringTask = client.GetStringAsync(host);
+                var content = await stringTask;
+            }
+        }
+
+        private static async Task CallHttpClientAsync(HttpClient client, string host)
+        {
+            var stringTask = client.GetStringAsync(host);
+            var content = await stringTask;
+        }
+
+        static void PdfCore(string[] args)
         {
             Console.WriteLine("Reproduce ReopenForReading Bug");
             Console.WriteLine("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
