@@ -9,6 +9,7 @@ using iTextSharp.text;
 using iTextSharp.text.pdf;
 using PdfRpt.Core.Helper;
 using PdfRpt.Core.Contracts;
+using RestSharp;
 
 namespace dotnetcore_travis_test
 {
@@ -17,7 +18,9 @@ namespace dotnetcore_travis_test
         static void Main(string[] args)
         {
             int numOfLoops = 10;
-            var host = "https://www.google.com";
+            var host = "https://httpbin.org";
+            var path = "get";
+            var target = $"{host}/{path}";
 
             Console.WriteLine($"Execute {numOfLoops} loops with New HttpClient...");
             Stopwatch sw = new Stopwatch();
@@ -25,7 +28,7 @@ namespace dotnetcore_travis_test
             for (int i = 1; i <= numOfLoops; i++)
             {
                 Console.Write($"{i}... ");
-                CallFreshHttpClientAsync(host).Wait();
+                CallFreshHttpClientAsync(target).Wait();
             }
             sw.Stop();
             Console.WriteLine("Elapsed={0} ms", sw.Elapsed.TotalMilliseconds);
@@ -37,11 +40,32 @@ namespace dotnetcore_travis_test
                 for (int i = 1; i <= numOfLoops; i++)
                 {
                     Console.Write($"{i}... ");
-                    CallHttpClientAsync(clientShared, host).Wait();
+                    CallHttpClientAsync(clientShared, target).Wait();
                 }
                 sw.Stop();
                 Console.WriteLine("Elapsed={0} ms", sw.Elapsed.TotalMilliseconds);
             }
+
+            Console.WriteLine($"Execute {numOfLoops} loops with RestSharp Async...");
+            sw.Restart();
+            for (int i = 1; i <= numOfLoops; i++)
+            {
+                Console.Write($"{i}... ");
+                CallRestClientAsync(host, path).Wait();
+            }
+            sw.Stop();
+            Console.WriteLine("Elapsed={0} ms", sw.Elapsed.TotalMilliseconds);
+
+            Console.WriteLine($"Execute {numOfLoops} loops with RestSharp...");
+            sw.Restart();
+            for (int i = 1; i <= numOfLoops; i++)
+            {
+                Console.Write($"{i}... ");
+                CallRestClient(host, path);
+            }
+            sw.Stop();
+            Console.WriteLine("Elapsed={0} ms", sw.Elapsed.TotalMilliseconds);
+
         }
 
         private static async Task CallFreshHttpClientAsync(string host)
@@ -58,6 +82,18 @@ namespace dotnetcore_travis_test
         {
             var stringTask = client.GetStringAsync(host);
             var content = await stringTask;
+        }
+
+        private static void CallRestClient(string host, string path)
+        {
+            var client = new RestClient(host);
+            IRestResponse response = client.Execute(new RestRequest(path, Method.GET));
+        }
+
+        private static async Task CallRestClientAsync(string host, string path)
+        {
+            var client = new RestClient(host);
+            var responseTask = await client.ExecuteTaskAsync(new RestRequest(path, Method.GET));
         }
 
         static void PdfCore(string[] args)
